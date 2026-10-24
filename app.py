@@ -138,7 +138,7 @@ def extract_records(text):
     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
     records = []
     for c in chunk_text(text):
-               resp = generate_with_retry(client, PROMPT + c)
+        resp = generate_with_retry(client, PROMPT + c)
         try:
             data = json.loads(resp.text)
             if isinstance(data, list):
