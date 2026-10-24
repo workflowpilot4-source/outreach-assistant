@@ -1,5 +1,6 @@
 import json
 import re
+import time
 from urllib.parse import quote
 
 import pandas as pd
@@ -112,16 +113,32 @@ PROMPT = (
     "Text:\n"
 )
 
-
+def generate_with_retry(client, contents):
+    models = [MODEL]
+    if "GEMINI_MODEL_2" in st.secrets:
+        models.append(st.secrets["GEMINI_MODEL_2"])
+    last = None
+    for attempt in range(4):
+        for m in models:
+            try:
+                return client.models.generate_content(
+                    model=m,
+                    contents=contents,
+                    config={"response_mime_type": "application/json"},
+                )
+            except Exception as e:
+                last = e
+                if any(x in str(e) for x in ("503", "429", "UNAVAILABLE")):
+                    continue
+                raise
+        time.sleep(4 * (attempt + 1))
+    raise last
+   
 def extract_records(text):
     client = genai.Client(api_key=st.secrets["GEMINI_API_KEY"])
     records = []
     for c in chunk_text(text):
-        resp = client.models.generate_content(
-            model=MODEL,
-            contents=PROMPT + c,
-            config={"response_mime_type": "application/json"},
-        )
+               resp = generate_with_retry(client, PROMPT + c)
         try:
             data = json.loads(resp.text)
             if isinstance(data, list):
