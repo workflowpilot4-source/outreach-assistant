@@ -8,7 +8,7 @@ import requests
 import streamlit as st
 from google import genai
 
-st.set_page_config(page_title="Outreach Assistant", page_icon="✈️", layout="wide")
+st.set_page_config(page_title="Outreach Assistant", page_icon="📈", layout="wide")
 
 MODEL = st.secrets.get("GEMINI_MODEL", "gemini-2.5-flash")
 
@@ -284,7 +284,7 @@ if "messages" not in st.session_state:
     st.session_state.board = None
     refresh_board()
 
-st.title("✈️ Outreach Assistant")
+st.title("📈 Outreach Assistant")
 tab_chat, tab_board = st.tabs(["💬 Chat", "📋 Board"])
 
 # ---------- chat tab ----------
