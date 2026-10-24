@@ -158,7 +158,7 @@ def normalize_number(n):
 
 
 def ig_user(v):
-    v = str(v or "").strip()
+    v = re.sub(r"\s+", "", str(v or ""))
     if not v or v.upper() == "NOT FOUND":
         return ""
     m = re.search(r"instagram\.com/([A-Za-z0-9._]+)", v)
