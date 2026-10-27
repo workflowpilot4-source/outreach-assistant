@@ -195,6 +195,25 @@ def clean(records):
 
 
 # ---------- chat helpers ----------
+def read_structured(f):
+    name = f.name.lower()
+    try:
+        if name.endswith(".csv"):
+            df = pd.read_csv(f, dtype=str).fillna("")
+        elif name.endswith((".xlsx", ".xls")):
+            df = pd.read_excel(f, dtype=str).fillna("")
+        else:
+            return None
+    except Exception:
+        return None
+    finally:
+        f.seek(0)
+    cols = {c.strip().lower(): c for c in df.columns}
+    need = ["business", "email", "whatsapp", "instagram"]
+    if not all(n in cols for n in need):
+        return None
+    return [{n: row[cols[n]] for n in need} for _, row in df.iterrows()]
+    
 def say(role, text):
     st.session_state.messages.append((role, text))
 
@@ -298,7 +317,7 @@ with tab_chat:
             rows, dups, invalid, failed = [], 0, 0, False
             with st.spinner("Reading and sorting your file..."):
                 try:
-                    records = extract_records(file_to_text(up))
+                    records = read_structured(up) or extract_records(file_to_text(up))
                     rows, dups, invalid = clean(records)
                 except Exception as e:
                     failed = True
